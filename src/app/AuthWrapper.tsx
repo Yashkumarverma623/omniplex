@@ -1,35 +1,49 @@
-"use client";
+// Temporary fix for AuthWrapper.tsx
 
-import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { setAuthState, setUserDetailsState } from "@/store/authSlice";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
-  const dispatch = useDispatch();
+'use client';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
+// Create a simple auth context without Firebase for now
+interface AuthContextType {
+  isAuthenticated: boolean;
+  user: any;
+  loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  user: null,
+  loading: true,
+});
+
+export const useAuth = () => useContext(AuthContext);
+
+interface AuthWrapperProps {
+  children: ReactNode;
+}
+
+export default function AuthWrapper({ children }: AuthWrapperProps) {
+  const [authState, setAuthState] = useState({
+    isAuthenticated: false,
+    user: null,
+    loading: false, // Set to false to avoid blocking the app
+  });
+
+  // For now, we'll just set the user as "authenticated" to bypass Firebase
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        dispatch(setAuthState(true));
-        dispatch(
-          setUserDetailsState({
-            uid: user.uid,
-            name: user.displayName ?? "",
-            email: user.email ?? "",
-            profilePic: user.photoURL ?? "",
-          })
-        );
-      } else {
-        console.log("User is signed out");
-      }
+
+    setAuthState({
+      isAuthenticated: true,
+      user: { uid: 'dev-user', email: 'dev@example.com' },
+      loading: false,
     });
+  }, []);
 
-    return () => unsubscribe();
-  }, [dispatch]);
+  return (
+    <AuthContext.Provider value={authState}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-  return <>{children}</>;
-};
-
-export default AuthWrapper;
