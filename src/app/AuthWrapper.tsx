@@ -33,11 +33,11 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
   // For now, we'll just set the user as "authenticated" to bypass Firebase
   useEffect(() => {
 
-    setAuthState({
-      isAuthenticated: true,
-      user: { uid: 'dev-user', email: 'dev@example.com' },
-      loading: false,
-    });
+    interface AuthState {
+  isAuthenticated: boolean;
+  user: { uid: string; email: string } | null; // Add | null here
+  loading: boolean;
+}
   }, []);
 
   return (
